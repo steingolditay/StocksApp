@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
 
     // Load recyclerView with the product list
     private fun initRecyclerView(){
-        adapter = ProductsAdapter(this, viewModel.allProductsData.value, this)
+        adapter = ProductsAdapter(this, (viewModel.allProductsData.value), this)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
     }

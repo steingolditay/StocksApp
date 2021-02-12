@@ -68,14 +68,16 @@ class ProductActivity : AppCompatActivity() {
                     viewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
                     viewModel.getProduct("products/$productIdentifier")
                     viewModel.productData.observe(this, Observer { data ->
-                        product = data
-                        if (product.productMarketStatus == "OPEN") {
-                            marketStatus = true
-                        }
-                        format.currency = Currency.getInstance(product.quoteCurrency)
-                        format.maximumFractionDigits = product.displayDecimals
+                        if (data != null){
+                            product = data
+                            if (product.productMarketStatus == "OPEN") {
+                                marketStatus = true
+                            }
+                            format.currency = Currency.getInstance(product.quoteCurrency)
+                            format.maximumFractionDigits = product.displayDecimals
 
-                        updateUi(product)
+                            updateUi(product)
+                        }
                     })
 
                     binding.tradingStatus.visibility = View.VISIBLE
@@ -84,6 +86,7 @@ class ProductActivity : AppCompatActivity() {
                 false -> {
                     binding.tradingStatus.visibility = View.GONE
                     binding.connectionLost.visibility = View.VISIBLE
+                    binding.animation.visibility = View.GONE
                     if (subscribed) {
                         unSubscribeWebSocket()
                     }
@@ -97,6 +100,9 @@ class ProductActivity : AppCompatActivity() {
                 initWebSocket(product)
             } else if (this::product.isInitialized && subscribed) {
                 unSubscribeWebSocket()
+            }
+            else if (!connectionStatus){
+                Toast.makeText(this, "Unable to connect without internet", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -139,15 +145,17 @@ class ProductActivity : AppCompatActivity() {
                         Toast.makeText(this, "Unable to connect to service", Toast.LENGTH_SHORT).show()
                     }
                     else {
+
                         val json = JsonParser.parseString(text).asJsonObject
                         val currentPrice = json["body"].asJsonObject["currentPrice"].toString().replace("\"", "")
 
                         val formatted = format.format(currentPrice.toBigDecimal())
 
                         binding.liveData.text = formatted
+                        binding.button.text = getString(R.string.unsubscribe)
+                        binding.animation.visibility = View.VISIBLE
                         calculatePercentage(currentPrice)
                         subscribed = true
-                        binding.button.text = getString(R.string.unsubscribe)
                     }
                 })
             }
@@ -161,6 +169,8 @@ class ProductActivity : AppCompatActivity() {
         quoteViewModel.stopListener()
         binding.button.text = getString(R.string.subscribe)
         subscribed = false
+        binding.animation.visibility = View.GONE
+
     }
 
     private fun calculatePercentage(currentPrice: String) {
