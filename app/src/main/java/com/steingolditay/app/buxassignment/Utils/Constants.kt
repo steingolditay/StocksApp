@@ -1,4 +1,4 @@
-package com.steingolditay.app.buxassignment
+package com.steingolditay.app.buxassignment.Utils
 
 class Constants {
     companion object{

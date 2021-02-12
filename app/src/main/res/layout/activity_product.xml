@@ -17,6 +17,7 @@
         android:layout_margin="10dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -33,67 +34,135 @@
                 android:gravity="center"
                 />
 
-            <TextView
-                android:id="@+id/productSymbol"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/labels"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/productName"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_margin="10dp"
-                />
-
-            <TextView
-                android:id="@+id/productId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/productSymbol"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_margin="10dp"
-                />
-
-
-            <TextView
-                android:id="@+id/productCurrentPrice"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/productId"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_margin="10dp"
-
-                />
-
-            <TextView
-                android:id="@+id/productClosingPrice"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/productCurrentPrice"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_margin="10dp"
+                android:layout_margin="10dp">
 
-                />
+                <TextView
+                    android:id="@+id/labelSymbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="10dp"
+                    android:text="Symbol:"
+                    android:textStyle="bold"
+
+                    />
+
+                <TextView
+                    android:id="@+id/labelId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/labelSymbol"
+                    app:layout_constraintStart_toStartOf="@id/labelSymbol"
+                    android:layout_marginTop="10dp"
+                    android:text="Id:"
+                    android:textStyle="bold"
+
+
+                    />
+
+
+                <TextView
+                    android:id="@+id/labelClosingPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/labelId"
+                    app:layout_constraintStart_toStartOf="@id/labelId"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginTop="10dp"
+                    android:text="Closing Price:"
+                    android:textStyle="bold"
+
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/values"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/labels"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/productName"
+                android:layout_margin="10dp">
+
+                <TextView
+                    android:id="@+id/productSymbol"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="10dp"
+                    />
+
+                <TextView
+                    android:id="@+id/productId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/productSymbol"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="10dp"
+                    />
+
+
+                <TextView
+                    android:id="@+id/productClosingPrice"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/productId"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginTop="10dp"
+
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/tradingStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="10dp"
+        android:gravity="center_horizontal"/>
 
     <TextView
-        android:id="@+id/liveData"
+        android:id="@+id/labelLiveData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Current Value"
+        android:textStyle="bold"
+        />
+
+
+    <TextView
+        android:id="@+id/liveData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/labelLiveData"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="10dp"
         android:textSize="20sp"
         />
@@ -108,6 +177,18 @@
         android:layout_margin="10dp"
         />
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/labelLiveData"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone"
+        />
+
+
     <Button
         android:id="@+id/button"
         android:layout_width="0dp"
@@ -117,8 +198,45 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="30dp"
-        android:text="Subscribe"
+        android:layout_marginVertical="10dp"
+        android:text="@string/subscribe"
         />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/connectionLost"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/labelLiveData"
+        android:visibility="gone"
+
+        >
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/no_signal"
+            />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/icon"
+            android:layout_marginTop="10dp"
+            android:text="No internet connection\nPlease reconnect to proceed"
+            android:textColor="@color/red"
+            android:gravity="center_horizontal"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

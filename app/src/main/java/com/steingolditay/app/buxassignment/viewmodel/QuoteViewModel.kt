@@ -3,8 +3,8 @@ package com.steingolditay.app.buxassignment.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.steingolditay.app.buxassignment.Constants
-import com.steingolditay.app.buxassignment.api.WebSocketListener
+import com.steingolditay.app.buxassignment.Utils.Constants
+import com.steingolditay.app.buxassignment.repository.WebSocketListener
 import com.steingolditay.app.buxassignment.model.Product
 import kotlinx.coroutines.launch
 import okhttp3.Interceptor

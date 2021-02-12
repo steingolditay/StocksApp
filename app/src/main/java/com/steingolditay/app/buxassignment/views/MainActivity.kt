@@ -3,13 +3,14 @@ package com.steingolditay.app.buxassignment.views
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.steingolditay.app.buxassignment.Constants
+import com.steingolditay.app.buxassignment.Utils.Constants
+import com.steingolditay.app.buxassignment.Utils.NetworkConnectionMonitor
 import com.steingolditay.app.buxassignment.R
 import com.steingolditay.app.buxassignment.adapters.ProductsAdapter
 import com.steingolditay.app.buxassignment.databinding.ActivityMainBinding
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
     private lateinit var viewModel: ProductViewModel
     private lateinit var adapter: ProductsAdapter
 
+    private val networkConnectionMonitor = NetworkConnectionMonitor(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,24 +35,41 @@ class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
         val view = binding.root
         setContentView(view)
 
-        val repository = Repository()
-        val viewModelFactory = ProductViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
+        // Check if internet connection is available
+        // LiveData listener is implemented for real-time response
+        networkConnectionMonitor.registerNetworkCallback()
+        networkConnectionMonitor.liveData.observe(this, Observer {
+            // if connection available, load product list
+            // if not, load connection lost image
+            when(it){
+                true -> {
+                    binding.recyclerView.visibility = View.VISIBLE
+                    binding.connectionLost.visibility = View.GONE
+                    val repository = Repository()
+                    val viewModelFactory = ProductViewModelFactory(repository)
+                    viewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
 
-        viewModel.getAllProducts()
+                    viewModel.getAllProducts()
 
-        viewModel.allProductsData.observe(this, Observer {
-            initRecyclerView()
+                    viewModel.allProductsData.observe(this, Observer { product ->
+                        if (product != null){
+                            initRecyclerView()
+                        }
+                    })
+                }
 
+                false -> {
+                    binding.recyclerView.visibility = View.GONE
+                    binding.connectionLost.visibility = View.VISIBLE
+                }
+            }
         })
 
-//        viewModel.getProduct("products/sb26496")
-//        viewModel.productData.observe(this, Observer {
-//            binding.text.text = it.closingPrice["amount"].toString()
-//        })
+
+
 
     }
-
+    // Implement search object to the toolbar
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.product_search_menu, menu)
@@ -71,13 +91,14 @@ class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
         return true
     }
 
+    // Load recyclerView with the product list
     private fun initRecyclerView(){
         adapter = ProductsAdapter(this, viewModel.allProductsData.value, this)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
-
     }
 
+    // Move to product view
     override fun onItemClick(product: Product) {
         val intent = Intent(this, ProductActivity::class.java)
         intent.putExtra(Constants.product_identifier, product.securityId)

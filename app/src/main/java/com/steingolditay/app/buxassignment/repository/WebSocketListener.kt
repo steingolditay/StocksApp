@@ -1,9 +1,9 @@
-package com.steingolditay.app.buxassignment.api
+package com.steingolditay.app.buxassignment.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.steingolditay.app.buxassignment.Constants
+import com.steingolditay.app.buxassignment.Utils.Constants
 import com.steingolditay.app.buxassignment.model.Product
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -20,6 +20,7 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
+        Log.d("TAG", "onFailure: $response + $t")
         unSubscribeFromChannel()
     }
 
@@ -39,7 +40,7 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
                 subscribeToChannel(webSocket)
             }
             text.contains("connect.failed") -> {
-                unSubscribeFromChannel()
+                outputData("Error")
                 Log.d("TAG", "onMessage: Error in connection to Web Socket")
             }
             text.contains("trading.quote") -> {
@@ -56,11 +57,9 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
 
         try {
             subscribeObject.put("subscribeTo", subscribeArray)
-
             webSocket.send(subscribeObject.toString())
-
-
-        } catch (e: JSONException) {
+        }
+        catch (e: JSONException) {
             Log.d("TAG", "createJsonObject: $e")
             e.printStackTrace();
         }
