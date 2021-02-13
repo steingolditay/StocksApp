@@ -57,10 +57,11 @@ class QuoteActivity : AppCompatActivity() {
 
         // get product id from bundle
         val bundle = intent.extras
-        val productIdentifier = bundle?.getString(Constants.product_identifier)
+        val productIdentifier = bundle?.getString(Constants.product_identifier)!!
 
         val repository = Repository()
         val viewModelFactory = ProductsListViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProductsListViewModel::class.java)
 
         // init an internet connection monitor
         networkConnectionMonitor.registerNetworkCallback()
@@ -70,15 +71,8 @@ class QuoteActivity : AppCompatActivity() {
             // if not, load connection lost image and un subscribe
             when (connectionStatus) {
                 true -> {
-                    viewModel = ViewModelProvider(this, viewModelFactory).get(ProductsListViewModel::class.java)
-                    viewModel.getProduct("products/$productIdentifier")
-                    viewModel.productData.observe(this, Observer { data ->
-                        if (data != null){
-                            product = data
-                            updateUi(product)
-                        }
-                    })
                     updateUIConnected()
+                    initViewModel(productIdentifier)
                 }
                 false -> {
                     updateUIDisconnected()
@@ -90,8 +84,20 @@ class QuoteActivity : AppCompatActivity() {
         })
 
         binding.button.setOnClickListener {
-            subscribeFunction()
+            subscribeButtonFunction()
         }
+    }
+
+    // init viewModel for static product data
+    private fun initViewModel(productIdentifier: String){
+        viewModel.getProduct("products/$productIdentifier")
+        viewModel.productData.observe(this, Observer { data ->
+            if (data != null){
+                product = data
+                updateUi(product)
+            }
+        })
+
     }
 
     // updates the ui with the statically current data
@@ -128,6 +134,8 @@ class QuoteActivity : AppCompatActivity() {
         // (?) probably should hide the subscribe button if market is closed
     }
 
+    // init viewModel for dynamic quote updates
+    // if market is open
     private fun initWebSocket(product: Product) {
         when (marketStatus) {
             true -> {
@@ -142,7 +150,6 @@ class QuoteActivity : AppCompatActivity() {
                         Constants.success -> {
                             hideProgressBar()
                             binding.progressBar.visibility = View.GONE
-
                         }
                         else -> {
                             val json = JsonParser.parseString(text).asJsonObject
@@ -200,7 +207,7 @@ class QuoteActivity : AppCompatActivity() {
     }
 
     // determine the subscribe button functionality
-    private fun subscribeFunction(){
+    private fun subscribeButtonFunction(){
         if (this::product.isInitialized && !subscribed && connectionStatus) {
             initWebSocket(product)
         } else if (this::product.isInitialized && subscribed) {
