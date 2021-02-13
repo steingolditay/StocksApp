@@ -10,5 +10,8 @@ class Constants {
         const val websocket_url = "https://rtf.beta.getbux.com/subscriptions/me"
         const val websocket_close = 1001
         const val open = "OPEN"
+        const val error = "Error"
+        const val success = "Success"
+
     }
 }

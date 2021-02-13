@@ -1,10 +1,11 @@
 package com.steingolditay.app.buxassignment.views
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
@@ -20,14 +21,16 @@ import com.steingolditay.app.buxassignment.repository.Repository
 import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModel
 import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModelFactory
 
-
+// the main activity
+// shows a list of all products
+// a user can search and select a product to view
 class ProductsListActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var viewModel: ProductsListViewModel
     private lateinit var adapter: ProductsAdapter
     private val networkConnectionMonitor = NetworkConnectionMonitor(this)
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -62,6 +65,8 @@ class ProductsListActivity : AppCompatActivity(), ProductsAdapter.OnItemClickLis
         viewModel.allProductsData.observe(this, Observer { product ->
             if (product != null) {
                 initRecyclerView()
+            } else {
+                showAlertDialog()
             }
         })
     }
@@ -110,6 +115,25 @@ class ProductsListActivity : AppCompatActivity(), ProductsAdapter.OnItemClickLis
     private fun updateUIDisconnected() {
         binding.recyclerView.visibility = View.GONE
         binding.connectionLost.visibility = View.VISIBLE
+    }
+
+    // shows in case okhttp client return null object
+    // which means it was unable to require data
+    private fun showAlertDialog() {
+        val alertBuilder = AlertDialog.Builder(this)
+        alertBuilder.setMessage(getString(R.string.service_unavailable))
+        alertBuilder.setCancelable(false)
+
+        alertBuilder.setPositiveButton(getString(R.string.retry),
+                object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        dialog?.dismiss()
+                        initViewHolder()
+                    }
+                })
+        val dialog = alertBuilder.create()
+
+        dialog.show()
     }
 
 

@@ -11,6 +11,7 @@
     <string name="label_id">ID:</string>
     <string name="label_closing_price">Closing Price:</string>
     <string name="label_current_value">Current Value</string>
+    <string name="retry">Retry</string>
 
 
 

@@ -1,8 +1,10 @@
 package com.steingolditay.app.buxassignment.views
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +25,10 @@ import java.text.NumberFormat
 import java.util.*
 
 
+
+// secondary activity
+// allows the user to see the current product data statically
+// user can use the subscribe button to receive live updates
 class QuoteActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProductBinding
@@ -88,6 +94,7 @@ class QuoteActivity : AppCompatActivity() {
         }
     }
 
+    // updates the ui with the statically current data
     private fun updateUi(product: Product) {
         // format currency and decimals according to the product
         format.currency = Currency.getInstance(product.quoteCurrency)
@@ -121,29 +128,33 @@ class QuoteActivity : AppCompatActivity() {
         // (?) probably should hide the subscribe button if market is closed
     }
 
-
     private fun initWebSocket(product: Product) {
         when (marketStatus) {
             true -> {
-                binding.progressBar.visibility = View.VISIBLE
+                showProgressBar()
                 quoteViewModel = ViewModelProvider(this).get(QuoteViewModel::class.java)
                 quoteViewModel.getLiveData(product).observe(this, Observer { text ->
-                    binding.progressBar.visibility = View.GONE
+                    when (text){
+                        Constants.error -> {
+                            hideProgressBar()
+                            showAlertDialog()
+                        }
+                        Constants.success -> {
+                            hideProgressBar()
+                            binding.progressBar.visibility = View.GONE
 
-                    if (text == "Error") {
-                        Toast.makeText(this, getString(R.string.service_unavailable), Toast.LENGTH_SHORT).show()
-                    }
-                    else {
+                        }
+                        else -> {
+                            val json = JsonParser.parseString(text).asJsonObject
+                            val currentPrice = json["body"].asJsonObject["currentPrice"].toString().replace("\"", "")
+                            val formatted = format.format(currentPrice.toBigDecimal())
+                            binding.liveData.text = formatted
+                            binding.button.text = getString(R.string.unsubscribe)
 
-                        val json = JsonParser.parseString(text).asJsonObject
-                        val currentPrice = json["body"].asJsonObject["currentPrice"].toString().replace("\"", "")
-                        val formatted = format.format(currentPrice.toBigDecimal())
-
-                        binding.liveData.text = formatted
-                        binding.button.text = getString(R.string.unsubscribe)
-                        binding.animation.visibility = View.VISIBLE
-                        calculatePercentage(currentPrice)
-                        subscribed = true
+                            showAnimation()
+                            calculatePercentage(currentPrice)
+                            subscribed = true
+                        }
                     }
                 })
             }
@@ -157,7 +168,7 @@ class QuoteActivity : AppCompatActivity() {
         quoteViewModel.stopListener()
         binding.button.text = getString(R.string.subscribe)
         subscribed = false
-        binding.animation.visibility = View.GONE
+        hideAnimation()
 
     }
 
@@ -173,9 +184,7 @@ class QuoteActivity : AppCompatActivity() {
         } else {
             binding.percentage.setTextColor(getColor(R.color.red))
             binding.percentage.text = String.format("-%s%%", difference)
-
         }
-
 
     }
 
@@ -187,9 +196,10 @@ class QuoteActivity : AppCompatActivity() {
     private fun updateUIDisconnected(){
         binding.tradingStatus.visibility = View.GONE
         binding.connectionLost.visibility = View.VISIBLE
-        binding.animation.visibility = View.GONE
+        hideAnimation()
     }
 
+    // determine the subscribe button functionality
     private fun subscribeFunction(){
         if (this::product.isInitialized && !subscribed && connectionStatus) {
             initWebSocket(product)
@@ -200,4 +210,32 @@ class QuoteActivity : AppCompatActivity() {
             Toast.makeText(this, "Unable to connect without internet", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // shows in case okhttp client return null object
+    // which means it was unable to require data
+    private fun showAlertDialog() {
+        val alertBuilder = AlertDialog.Builder(this)
+        alertBuilder.setMessage(getString(R.string.service_unavailable))
+        alertBuilder.setCancelable(false)
+
+        alertBuilder.setPositiveButton(getString(R.string.retry),
+                object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        dialog?.dismiss()
+                        initWebSocket(product)
+                    }
+                })
+        val dialog = alertBuilder.create()
+
+        dialog.show()
+    }
+
+    private fun showProgressBar(){binding.progressBar.visibility = View.VISIBLE}
+
+    private fun hideProgressBar(){binding.progressBar.visibility = View.GONE}
+
+    private fun showAnimation(){binding.animation.visibility = View.VISIBLE}
+
+    private fun hideAnimation(){binding.animation.visibility = View.GONE}
+
 }

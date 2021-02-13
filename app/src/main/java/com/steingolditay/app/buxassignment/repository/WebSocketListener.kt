@@ -20,28 +20,19 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
-        Log.d("TAG", "onFailure: $response + $t")
         unSubscribeFromChannel()
     }
 
-    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        super.onClosing(webSocket, code, reason)
-        Log.d("TAG", "onClosing:\ncode: $code\nreason: $reason ")
-
-    }
-
-
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
-        Log.d("TAG", "onMessage: $text")
         when {
             text.contains("connect.connected") -> {
                 this.webSocket = webSocket
+                outputData(Constants.success)
                 subscribeToChannel(webSocket)
             }
             text.contains("connect.failed") -> {
-                outputData("Error")
-                Log.d("TAG", "onMessage: Error in connection to Web Socket")
+                outputData(Constants.error)
             }
             text.contains("trading.quote") -> {
                 outputData(text)
@@ -60,13 +51,11 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
             webSocket.send(subscribeObject.toString())
         }
         catch (e: JSONException) {
-            Log.d("TAG", "createJsonObject: $e")
             e.printStackTrace();
         }
     }
 
     fun unSubscribeFromChannel() {
-        Log.d("TAG", "unSubscribeFromChannel: ")
         val unSubscribeObject = JSONObject()
         val unSubscribeArray = JSONArray()
         unSubscribeArray.put("trading.product.${product.securityId}")
@@ -79,7 +68,6 @@ class WebSocketListener(private val product: Product) : WebSocketListener() {
 
 
         } catch (e: JSONException) {
-            Log.d("TAG", "createJsonObject: $e")
             e.printStackTrace();
         }
     }
