@@ -3,12 +3,9 @@ package com.steingolditay.app.buxassignment.Utils
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkRequest
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
-import kotlin.math.log
 
 class NetworkConnectionMonitor(val context: Context) {
 
@@ -26,7 +23,6 @@ class NetworkConnectionMonitor(val context: Context) {
                     super.onAvailable(network)
                     _liveData.postValue(true)
                 }
-
                 override fun onLost(network: Network) {
                     super.onLost(network)
                     _liveData.postValue(false)
@@ -34,15 +30,9 @@ class NetworkConnectionMonitor(val context: Context) {
             })
 
         }
-
         catch (e: Exception){
 
         }
     }
-
-
-
-
-
 
 }

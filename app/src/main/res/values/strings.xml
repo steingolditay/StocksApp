@@ -3,4 +3,15 @@
     <string name="search">Search</string>
     <string name="subscribe">Subscribe</string>
     <string name="unsubscribe">Unsubscribe</string>
+    <string name="tradings_open">Tradings are open</string>
+    <string name="tradings_closed">Tradings are closed</string>
+    <string name="service_unavailable">Unable to connect to service</string>
+    <string name="no_internet">No internet connection\nPlease reconnect to proceed</string>
+    <string name="label_symbol">Symbol:</string>
+    <string name="label_id">ID:</string>
+    <string name="label_closing_price">Closing Price:</string>
+    <string name="label_current_value">Current Value</string>
+
+
+
 </resources>

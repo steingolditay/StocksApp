@@ -9,5 +9,6 @@ class Constants {
         const val accept_language = "nl-NL,en;q=0.8"
         const val websocket_url = "https://rtf.beta.getbux.com/subscriptions/me"
         const val websocket_close = 1001
+        const val open = "OPEN"
     }
 }

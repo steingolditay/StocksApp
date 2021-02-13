@@ -2,6 +2,7 @@ package com.steingolditay.app.buxassignment.views
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -16,60 +17,56 @@ import com.steingolditay.app.buxassignment.adapters.ProductsAdapter
 import com.steingolditay.app.buxassignment.databinding.ActivityMainBinding
 import com.steingolditay.app.buxassignment.model.Product
 import com.steingolditay.app.buxassignment.repository.Repository
-import com.steingolditay.app.buxassignment.viewmodel.ProductViewModel
-import com.steingolditay.app.buxassignment.viewmodel.ProductViewModelFactory
+import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModel
+import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModelFactory
 
 
-class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
+class ProductsListActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var viewModel: ProductViewModel
+    private lateinit var viewModel: ProductsListViewModel
     private lateinit var adapter: ProductsAdapter
-
     private val networkConnectionMonitor = NetworkConnectionMonitor(this)
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
+
+        val repository = Repository()
+        val viewModelFactory = ProductsListViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProductsListViewModel::class.java)
+
         // Check if internet connection is available
         // LiveData listener is implemented for real-time response
         networkConnectionMonitor.registerNetworkCallback()
         networkConnectionMonitor.liveData.observe(this, Observer {
             // if connection available, load product list
-            // if not, load connection lost image
-            when(it){
+            // if not, notify user
+            when (it) {
                 true -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.connectionLost.visibility = View.GONE
-                    val repository = Repository()
-                    val viewModelFactory = ProductViewModelFactory(repository)
-                    viewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
-
-                    viewModel.getAllProducts()
-
-                    viewModel.allProductsData.observe(this, Observer { product ->
-                        if (product != null){
-                            initRecyclerView()
-                        }
-                    })
+                    updateUIConnected()
+                    initViewHolder()
                 }
-
                 false -> {
-                    binding.recyclerView.visibility = View.GONE
-                    binding.connectionLost.visibility = View.VISIBLE
+                    updateUIDisconnected()
                 }
             }
         })
-
-
-
-
     }
-    // Implement search object to the toolbar
+
+    private fun initViewHolder() {
+        viewModel.getAllProducts()
+        viewModel.allProductsData.observe(this, Observer { product ->
+            if (product != null) {
+                initRecyclerView()
+            }
+        })
+    }
+
+    // Implement search function to the toolbar
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.product_search_menu, menu)
@@ -77,32 +74,42 @@ class MainActivity : AppCompatActivity(), ProductsAdapter.OnItemClickListener {
         val searchItem = menu?.findItem(R.id.search)
         val searchView = searchItem?.actionView as SearchView
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
+
             override fun onQueryTextChange(newText: String?): Boolean {
                 adapter.filter.filter(newText)
                 return false
             }
-
         })
 
         return true
     }
 
     // Load recyclerView with the product list
-    private fun initRecyclerView(){
+    private fun initRecyclerView() {
         adapter = ProductsAdapter(this, (viewModel.allProductsData.value), this)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
     }
 
-    // Move to product view
+    // Move to single product view on item selected
     override fun onItemClick(product: Product) {
-        val intent = Intent(this, ProductActivity::class.java)
+        val intent = Intent(this, QuoteActivity::class.java)
         intent.putExtra(Constants.product_identifier, product.securityId)
         startActivity(intent)
+    }
+
+    private fun updateUIConnected() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.connectionLost.visibility = View.GONE
+    }
+
+    private fun updateUIDisconnected() {
+        binding.recyclerView.visibility = View.GONE
+        binding.connectionLost.visibility = View.VISIBLE
     }
 
 

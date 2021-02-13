@@ -27,9 +27,6 @@ object RetrofitInstance {
             })
             .retryOnConnectionFailure(false)
             .connectTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
-            .writeTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
             .build()
 
     private val retrofit by lazy {

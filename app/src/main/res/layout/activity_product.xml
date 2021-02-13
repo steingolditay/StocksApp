@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".views.MainActivity">
+    tools:context=".views.ProductsListActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
@@ -50,7 +50,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     android:layout_marginTop="10dp"
-                    android:text="Symbol:"
+                    android:text="@string/label_symbol"
                     android:textStyle="bold"
 
                     />
@@ -62,7 +62,7 @@
                     app:layout_constraintTop_toBottomOf="@id/labelSymbol"
                     app:layout_constraintStart_toStartOf="@id/labelSymbol"
                     android:layout_marginTop="10dp"
-                    android:text="Id:"
+                    android:text="@string/label_id"
                     android:textStyle="bold"
 
 
@@ -77,7 +77,7 @@
                     app:layout_constraintStart_toStartOf="@id/labelId"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_marginTop="10dp"
-                    android:text="Closing Price:"
+                    android:text="@string/label_closing_price"
                     android:textStyle="bold"
 
                     />
@@ -165,7 +165,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Current Value"
+        android:text="@string/label_current_value"
         android:textStyle="bold"
         />
 
@@ -246,7 +246,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/icon"
             android:layout_marginTop="10dp"
-            android:text="No internet connection\nPlease reconnect to proceed"
+            android:text="@string/no_internet"
             android:textColor="@color/red"
             android:gravity="center_horizontal"
             />

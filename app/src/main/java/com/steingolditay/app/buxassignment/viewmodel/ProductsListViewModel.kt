@@ -1,5 +1,6 @@
 package com.steingolditay.app.buxassignment.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +8,7 @@ import com.steingolditay.app.buxassignment.model.Product
 import com.steingolditay.app.buxassignment.repository.Repository
 import kotlinx.coroutines.launch
 
-class ProductViewModel(private val repository: Repository): ViewModel() {
+class ProductsListViewModel(private val repository: Repository): ViewModel() {
 
     val productData = MutableLiveData<Product>()
     val allProductsData = MutableLiveData<ArrayList<Product>>()
@@ -23,6 +24,7 @@ class ProductViewModel(private val repository: Repository): ViewModel() {
         viewModelScope.launch {
             val response = repository.getAllProducts()
             allProductsData.value = response
+
         }
     }
 }

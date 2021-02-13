@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.MainActivity">
+    tools:context=".views.ProductsListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -47,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/icon"
             android:layout_marginTop="10dp"
-            android:text="No internet connection\nPlease reconnect to proceed"
+            android:text="@string/no_internet"
             android:textColor="@color/red"
             android:gravity="center_horizontal"
             />

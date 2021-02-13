@@ -19,7 +19,7 @@ class Repository {
     }
 
     suspend fun getProduct(product: String): Product? {
-        return return try {
+        return try {
             RetrofitInstance.api.getProduct(product)
         }
         catch (e: Exception){

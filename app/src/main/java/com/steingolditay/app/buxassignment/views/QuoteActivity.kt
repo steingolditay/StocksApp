@@ -1,7 +1,6 @@
 package com.steingolditay.app.buxassignment.views
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +13,8 @@ import com.steingolditay.app.buxassignment.R
 import com.steingolditay.app.buxassignment.databinding.ActivityProductBinding
 import com.steingolditay.app.buxassignment.model.Product
 import com.steingolditay.app.buxassignment.repository.Repository
-import com.steingolditay.app.buxassignment.viewmodel.ProductViewModel
-import com.steingolditay.app.buxassignment.viewmodel.ProductViewModelFactory
+import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModel
+import com.steingolditay.app.buxassignment.viewmodel.ProductsListViewModelFactory
 import com.steingolditay.app.buxassignment.viewmodel.QuoteViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -24,10 +23,10 @@ import java.text.NumberFormat
 import java.util.*
 
 
-class ProductActivity : AppCompatActivity() {
+class QuoteActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProductBinding
-    private lateinit var viewModel: ProductViewModel
+    private lateinit var viewModel: ProductsListViewModel
     private lateinit var quoteViewModel: QuoteViewModel
     private lateinit var product: Product
     private var subscribed = false
@@ -50,14 +49,14 @@ class ProductActivity : AppCompatActivity() {
         setContentView(view)
 
 
+        // get product id from bundle
         val bundle = intent.extras
         val productIdentifier = bundle?.getString(Constants.product_identifier)
 
         val repository = Repository()
-        val viewModelFactory = ProductViewModelFactory(repository)
+        val viewModelFactory = ProductsListViewModelFactory(repository)
 
-
-
+        // init an internet connection monitor
         networkConnectionMonitor.registerNetworkCallback()
         networkConnectionMonitor.liveData.observe(this, Observer { isConnected ->
             connectionStatus = isConnected
@@ -65,28 +64,18 @@ class ProductActivity : AppCompatActivity() {
             // if not, load connection lost image and un subscribe
             when (connectionStatus) {
                 true -> {
-                    viewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
+                    viewModel = ViewModelProvider(this, viewModelFactory).get(ProductsListViewModel::class.java)
                     viewModel.getProduct("products/$productIdentifier")
                     viewModel.productData.observe(this, Observer { data ->
                         if (data != null){
                             product = data
-                            if (product.productMarketStatus == "OPEN") {
-                                marketStatus = true
-                            }
-                            format.currency = Currency.getInstance(product.quoteCurrency)
-                            format.maximumFractionDigits = product.displayDecimals
-
                             updateUi(product)
                         }
                     })
-
-                    binding.tradingStatus.visibility = View.VISIBLE
-                    binding.connectionLost.visibility = View.GONE
+                    updateUIConnected()
                 }
                 false -> {
-                    binding.tradingStatus.visibility = View.GONE
-                    binding.connectionLost.visibility = View.VISIBLE
-                    binding.animation.visibility = View.GONE
+                    updateUIDisconnected()
                     if (subscribed) {
                         unSubscribeWebSocket()
                     }
@@ -94,20 +83,17 @@ class ProductActivity : AppCompatActivity() {
             }
         })
 
-
         binding.button.setOnClickListener {
-            if (this::product.isInitialized && !subscribed && connectionStatus) {
-                initWebSocket(product)
-            } else if (this::product.isInitialized && subscribed) {
-                unSubscribeWebSocket()
-            }
-            else if (!connectionStatus){
-                Toast.makeText(this, "Unable to connect without internet", Toast.LENGTH_SHORT).show()
-            }
+            subscribeFunction()
         }
     }
 
     private fun updateUi(product: Product) {
+        // format currency and decimals according to the product
+        format.currency = Currency.getInstance(product.quoteCurrency)
+        format.maximumFractionDigits = product.displayDecimals
+
+        // update product information
         binding.productName.text = product.displayName
         binding.productId.text = product.securityId
         binding.productSymbol.text = product.symbol
@@ -116,20 +102,23 @@ class ProductActivity : AppCompatActivity() {
         val formattedCurrent = format.format(product.currentPrice["amount"].toString().toBigDecimal())
         binding.productClosingPrice.text = formattedClosing
         binding.liveData.text = formattedCurrent
+        calculatePercentage(product.currentPrice["amount"].toString())
 
+
+        // update market status title
+        marketStatus = (product.productMarketStatus == Constants.open)
         when (marketStatus) {
             true -> {
-                binding.tradingStatus.text = "Tradings are open"
+                binding.tradingStatus.text = getString(R.string.tradings_open)
                 binding.tradingStatus.setTextColor(getColor(R.color.green))
             }
             false -> {
-                binding.tradingStatus.text = "Tradings are closed"
+                binding.tradingStatus.text = getString(R.string.tradings_closed)
                 binding.tradingStatus.setTextColor(getColor(R.color.red))
             }
         }
 
-
-        calculatePercentage(product.currentPrice["amount"].toString())
+        // (?) probably should hide the subscribe button if market is closed
     }
 
 
@@ -142,13 +131,12 @@ class ProductActivity : AppCompatActivity() {
                     binding.progressBar.visibility = View.GONE
 
                     if (text == "Error") {
-                        Toast.makeText(this, "Unable to connect to service", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.service_unavailable), Toast.LENGTH_SHORT).show()
                     }
                     else {
 
                         val json = JsonParser.parseString(text).asJsonObject
                         val currentPrice = json["body"].asJsonObject["currentPrice"].toString().replace("\"", "")
-
                         val formatted = format.format(currentPrice.toBigDecimal())
 
                         binding.liveData.text = formatted
@@ -160,7 +148,7 @@ class ProductActivity : AppCompatActivity() {
                 })
             }
             false -> {
-                Toast.makeText(this, "Tradings are closed right now", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.tradings_closed), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -191,4 +179,25 @@ class ProductActivity : AppCompatActivity() {
 
     }
 
+    private fun updateUIConnected(){
+        binding.tradingStatus.visibility = View.VISIBLE
+        binding.connectionLost.visibility = View.GONE
+    }
+
+    private fun updateUIDisconnected(){
+        binding.tradingStatus.visibility = View.GONE
+        binding.connectionLost.visibility = View.VISIBLE
+        binding.animation.visibility = View.GONE
+    }
+
+    private fun subscribeFunction(){
+        if (this::product.isInitialized && !subscribed && connectionStatus) {
+            initWebSocket(product)
+        } else if (this::product.isInitialized && subscribed) {
+            unSubscribeWebSocket()
+        }
+        else if (!connectionStatus){
+            Toast.makeText(this, "Unable to connect without internet", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
