@@ -8,7 +8,6 @@ import java.lang.Exception
 
 class Repository {
 
-
     suspend fun getAllProducts(): ArrayList<Product>?{
         return try {
             RetrofitInstance.api.getAllProducts()

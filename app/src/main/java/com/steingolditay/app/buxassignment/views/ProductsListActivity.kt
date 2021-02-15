@@ -3,6 +3,7 @@ package com.steingolditay.app.buxassignment.views
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -128,7 +129,7 @@ class ProductsListActivity : AppCompatActivity(), ProductsAdapter.OnItemClickLis
                 object : DialogInterface.OnClickListener {
                     override fun onClick(dialog: DialogInterface?, which: Int) {
                         dialog?.dismiss()
-                        initViewHolder()
+                        viewModel.getAllProducts()
                     }
                 })
         val dialog = alertBuilder.create()
